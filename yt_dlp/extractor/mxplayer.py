@@ -143,14 +143,11 @@ class MxplayerIE(InfoExtractor):
                 season = dct.get('name')
             elif dct.get('type') == 'tvshow_show':
                 series = dct.get('name')
-        thumbnails = []
-        for thumb in data_json.get('poster', []):
-            thumbnails.append({
+        thumbnails = [{
                 'url': thumb.get('url'),
                 'width': thumb.get('width'),
                 'height': thumb.get('height'),
-            })
-
+            } for thumb in data_json.get('poster', [])]
         formats = []
         subtitles = {}
         for dct in data_json.get('playInfo', []):

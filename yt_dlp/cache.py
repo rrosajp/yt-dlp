@@ -87,7 +87,7 @@ class Cache(object):
             return
 
         cachedir = self._get_root_dir()
-        if not any((term in cachedir) for term in ('cache', 'tmp')):
+        if all(term not in cachedir for term in ('cache', 'tmp')):
             raise Exception('Not removing directory %s - this does not look like a cache dir' % cachedir)
 
         self._ydl.to_screen(

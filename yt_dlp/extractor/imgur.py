@@ -51,9 +51,8 @@ class ImgurIE(InfoExtractor):
                 'No sources found for video %s. Maybe an image?' % video_id,
                 expected=True)
 
-        formats = []
-        for m in re.finditer(r'<source\s+src="(?P<src>[^"]+)"\s+type="(?P<type>[^"]+)"', video_elements):
-            formats.append({
+        formats = [
+            {
                 'format_id': m.group('type').partition('/')[2],
                 'url': self._proto_relative_url(m.group('src')),
                 'ext': mimetype2ext(m.group('type')),
@@ -62,7 +61,12 @@ class ImgurIE(InfoExtractor):
                 'http_headers': {
                     'User-Agent': 'yt-dlp (like wget)',
                 },
-            })
+            }
+            for m in re.finditer(
+                r'<source\s+src="(?P<src>[^"]+)"\s+type="(?P<type>[^"]+)"',
+                video_elements,
+            )
+        ]
 
         gif_json = self._search_regex(
             r'(?s)var\s+videoItem\s*=\s*(\{.*?\})',

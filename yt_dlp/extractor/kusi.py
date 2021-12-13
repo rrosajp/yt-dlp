@@ -66,14 +66,12 @@ class KUSIIE(InfoExtractor):
         creation_time = timeconvert(xpath_text(doc, 'rfc822creationdate'))
 
         quality_options = doc.find('{http://search.yahoo.com/mrss/}group').findall('{http://search.yahoo.com/mrss/}content')
-        formats = []
-        for quality in quality_options:
-            formats.append({
+        formats = [{
                 'url': compat_urllib_parse_unquote_plus(quality.attrib['url']),
                 'height': int_or_none(quality.attrib.get('height')),
                 'width': int_or_none(quality.attrib.get('width')),
                 'vbr': float_or_none(quality.attrib.get('bitratebits'), scale=1000),
-            })
+            } for quality in quality_options]
         self._sort_formats(formats)
 
         return {

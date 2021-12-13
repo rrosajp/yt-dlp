@@ -75,9 +75,7 @@ class AudiMediaIE(InfoExtractor):
                 }
                 bitrate = self._search_regex(r'(\d+)k', video_version_url, 'bitrate', default=None)
                 if bitrate:
-                    f.update({
-                        'format_id': 'http-%s' % bitrate,
-                    })
+                    f['format_id'] = 'http-%s' % bitrate
                 formats.append(f)
             self._sort_formats(formats)
 

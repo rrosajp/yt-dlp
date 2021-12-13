@@ -55,9 +55,7 @@ class RtmpFD(FileDownloader):
                         time_now = time.time()
                         eta = self.calc_eta(start, time_now, 100 - resume_percent, percent - resume_percent)
                         speed = self.calc_speed(start, time_now, downloaded_data_len - resume_downloaded_data_len)
-                        data_len = None
-                        if percent > 0:
-                            data_len = int(downloaded_data_len * 100 / percent)
+                        data_len = int(downloaded_data_len * 100 / percent) if percent > 0 else None
                         self._hook_progress({
                             'status': 'downloading',
                             'downloaded_bytes': downloaded_data_len,

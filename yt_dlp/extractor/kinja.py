@@ -146,13 +146,13 @@ class KinjaEmbedIE(InfoExtractor):
                 result_url = provider[0] + video_id
             return self.url_result('http://' + result_url, provider[1])
 
+        formats = []
         if video_type == 'kinjavideo':
             data = self._download_json(
                 'https://kinja.com/api/core/video/views/videoById',
                 video_id, query={'videoId': video_id})['data']
             title = data['title']
 
-            formats = []
             for k in ('signedPlaylist', 'streaming'):
                 m3u8_url = data.get(k + 'Url')
                 if m3u8_url:
@@ -189,8 +189,6 @@ class KinjaEmbedIE(InfoExtractor):
             data = self._download_json(
                 tvss_domain + '/api/v3/video-auth/url-signature-tokens',
                 video_id, query={'mcpids': video_id})['data'][0]
-            formats = []
-
             rendition_url = data.get('renditionUrl')
             if rendition_url:
                 formats = self._extract_m3u8_formats(

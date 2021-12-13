@@ -118,10 +118,10 @@ class CBCIE(InfoExtractor):
                 clip_id, fatal=False)
             if feed:
                 media_id = try_get(feed, lambda x: x['entries'][0]['guid'], compat_str)
-            if not media_id:
-                media_id = self._download_json(
-                    'http://feed.theplatform.com/f/h9dtGB/punlNGjMlc1F?fields=id&byContent=byReleases%3DbyId%253D' + clip_id,
-                    clip_id)['entries'][0]['id'].split('/')[-1]
+        if not media_id:
+            media_id = self._download_json(
+                'http://feed.theplatform.com/f/h9dtGB/punlNGjMlc1F?fields=id&byContent=byReleases%3DbyId%253D' + clip_id,
+                clip_id)['entries'][0]['id'].split('/')[-1]
         return self.url_result('cbcplayer:%s' % media_id, 'CBCPlayer', media_id)
 
     def _real_extract(self, url):
@@ -296,10 +296,7 @@ class CBCGemIE(InfoExtractor):
 
     def claims_token_expired(self):
         exp = self._get_claims_token_expiry()
-        if exp - time.time() < 10:
-            # It will expire in less than 10 seconds, or has already expired
-            return True
-        return False
+        return exp - time.time() < 10
 
     def claims_token_valid(self):
         return self._claims_token is not None and not self.claims_token_expired()
@@ -430,9 +427,7 @@ class CBCGemPlaylistIE(InfoExtractor):
         if season_info is None:
             raise ExtractorError(f'Couldn\'t find season {season} of {show}')
 
-        episodes = []
-        for episode in season_info['assets']:
-            episodes.append({
+        episodes = [{
                 '_type': 'url_transparent',
                 'ie_key': 'CBCGem',
                 'url': 'https://gem.cbc.ca/media/' + episode['id'],
@@ -449,8 +444,7 @@ class CBCGemPlaylistIE(InfoExtractor):
                 'episode_id': episode['id'],
                 'duration': episode.get('duration'),
                 'categories': [episode.get('category')],
-            })
-
+            } for episode in season_info['assets']]
         thumbnail = None
         tn_uri = season_info.get('image')
         # the-national was observed to use a "data:image/png;base64"

@@ -643,15 +643,12 @@ class BilibiliAudioIE(BilibiliAudioBaseIE):
         title = song['title']
         statistic = song.get('statistic') or {}
 
-        subtitles = None
         lyric = song.get('lyric')
-        if lyric:
-            subtitles = {
+        subtitles = {
                 'origin': [{
                     'url': lyric,
                 }]
-            }
-
+            } if lyric else None
         return {
             'id': au_id,
             'title': title,
@@ -728,10 +725,10 @@ class BiliIntlBaseIE(InfoExtractor):
         return self._download_json(self._API_URL.format(type, endpoint), id)['data']
 
     def json2srt(self, json):
-        data = '\n\n'.join(
+        return '\n\n'.join(
             f'{i + 1}\n{srt_subtitles_timecode(line["from"])} --> {srt_subtitles_timecode(line["to"])}\n{line["content"]}'
-            for i, line in enumerate(json['body']))
-        return data
+            for i, line in enumerate(json['body'])
+        )
 
     def _get_subtitles(self, type, ep_id):
         sub_json = self._call_api(type, f'/m/subtitle?ep_id={ep_id}&platform=web', ep_id)

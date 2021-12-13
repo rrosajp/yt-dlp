@@ -86,13 +86,10 @@ class DigitekaIE(InfoExtractor):
 
         jwconf = deliver_info['jwconf']
 
-        formats = []
-        for source in jwconf['playlist'][0]['sources']:
-            formats.append({
+        formats = [{
                 'url': source['file'],
                 'format_id': source.get('label'),
-            })
-
+            } for source in jwconf['playlist'][0]['sources']]
         self._sort_formats(formats)
 
         title = deliver_info['title']

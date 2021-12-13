@@ -146,23 +146,22 @@ class AnimeLabIE(AnimeLabBaseIE):
             season_id = str_or_none(season_data.get('id'))
 
             for video_data in raw_data['videoList']:
-                current_video_list = {}
-                current_video_list['language'] = video_data.get('language', {}).get('languageCode')
+                current_video_list = {
+                    'language': video_data.get('language', {}).get('languageCode')
+                }
 
                 is_hardsubbed = video_data.get('hardSubbed')
 
                 for video_instance in video_data['videoInstances']:
                     httpurl = video_instance.get('httpUrl')
-                    url = httpurl if httpurl else video_instance.get('rtmpUrl')
+                    url = httpurl or video_instance.get('rtmpUrl')
                     if url is None:
                         # this video format is unavailable to the user (not premium etc.)
                         continue
 
                     current_format = current_video_list.copy()
 
-                    format_id_parts = []
-
-                    format_id_parts.append(str_or_none(video_instance.get('id')))
+                    format_id_parts = [str_or_none(video_instance.get('id'))]
 
                     if is_hardsubbed is not None:
                         if is_hardsubbed:

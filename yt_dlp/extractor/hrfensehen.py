@@ -95,8 +95,8 @@ class HRFernsehenIE(InfoExtractor):
         if "subtitle" in loader_data:
             info["subtitles"] = {"de": [{"url": loader_data["subtitle"]}]}
 
-        thumbnails = list(set([t for t in loader_data.get("previewImageUrl", {}).values()]))
-        if len(thumbnails) > 0:
+        thumbnails = list(set(list(loader_data.get("previewImageUrl", {}).values())))
+        if thumbnails:
             info["thumbnails"] = [{"url": t} for t in thumbnails]
 
         return info

@@ -885,9 +885,9 @@ class YoutubeDL(object):
         '''
         if self.params.get('logger') is not None:
             self.params['logger'].warning(message)
+        elif self.params.get('no_warnings'):
+            return
         else:
-            if self.params.get('no_warnings'):
-                return
             self.to_stderr(f'{self._format_err("WARNING:", self.Styles.WARNING)} {message}', only_once)
 
     def deprecation_warning(self, message):
@@ -1225,13 +1225,11 @@ class YoutubeDL(object):
                 # This can happen when we're just evaluating the playlist
                 title = info_dict['title']
                 matchtitle = self.params.get('matchtitle', False)
-                if matchtitle:
-                    if not re.search(matchtitle, title, re.IGNORECASE):
-                        return '"' + title + '" title did not match pattern "' + matchtitle + '"'
+                if matchtitle and not re.search(matchtitle, title, re.IGNORECASE):
+                    return '"' + title + '" title did not match pattern "' + matchtitle + '"'
                 rejecttitle = self.params.get('rejecttitle', False)
-                if rejecttitle:
-                    if re.search(rejecttitle, title, re.IGNORECASE):
-                        return '"' + title + '" title matched reject pattern "' + rejecttitle + '"'
+                if rejecttitle and re.search(rejecttitle, title, re.IGNORECASE):
+                    return '"' + title + '" title matched reject pattern "' + rejecttitle + '"'
             date = info_dict.get('upload_date')
             if date is not None:
                 dateRange = self.params.get('daterange', DateRange())
@@ -1301,11 +1299,7 @@ class YoutubeDL(object):
         if not ie_key and force_generic_extractor:
             ie_key = 'Generic'
 
-        if ie_key:
-            ies = {ie_key: self._get_info_extractor_class(ie_key)}
-        else:
-            ies = self._ies
-
+        ies = {ie_key: self._get_info_extractor_class(ie_key)} if ie_key else self._ies
         for ie_key, ie in ies.items():
             if not ie.suitable(url):
                 continue
@@ -2833,16 +2827,12 @@ class YoutubeDL(object):
                             return False
 
                         # Check extension
-                        exts = set(format.get('ext') for format in formats)
+                        exts = {format.get('ext') for format in formats}
                         COMPATIBLE_EXTS = (
                             set(('mp3', 'mp4', 'm4a', 'm4p', 'm4b', 'm4r', 'm4v', 'ismv', 'isma')),
                             set(('webm',)),
                         )
-                        for ext_sets in COMPATIBLE_EXTS:
-                            if ext_sets.issuperset(exts):
-                                return True
-                        # TODO: Check acodec/vcodec
-                        return False
+                        return any(ext_sets.issuperset(exts) for ext_sets in COMPATIBLE_EXTS)
 
                     requested_formats = info_dict['requested_formats']
                     old_ext = info_dict['ext']
@@ -3092,10 +3082,14 @@ class YoutubeDL(object):
                 k.startswith('_') or k in remove_keys or v in empty_values)
         else:
             reject = lambda k, v: k in remove_keys
-        filter_fn = lambda obj: (
-            list(map(filter_fn, obj)) if isinstance(obj, (LazyList, list, tuple, set))
-            else obj if not isinstance(obj, dict)
-            else dict((k, filter_fn(v)) for k, v in obj.items() if not reject(k, v)))
+        filter_fn = (
+            lambda obj: list(map(filter_fn, obj))
+            if isinstance(obj, (LazyList, list, tuple, set))
+            else obj
+            if not isinstance(obj, dict)
+            else {k: filter_fn(v) for k, v in obj.items() if not reject(k, v)}
+        )
+
         return filter_fn(info_dict)
 
     @staticmethod
@@ -3265,10 +3259,7 @@ class YoutubeDL(object):
         if fdict.get('acodec') is not None:
             if res:
                 res += ', '
-            if fdict['acodec'] == 'none':
-                res += 'video only'
-            else:
-                res += '%-5s' % fdict['acodec']
+            res += 'video only' if fdict['acodec'] == 'none' else '%-5s' % fdict['acodec']
         elif fdict.get('abr') is not None:
             if res:
                 res += ', '

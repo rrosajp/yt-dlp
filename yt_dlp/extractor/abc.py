@@ -113,11 +113,11 @@ class ABCIE(InfoExtractor):
                 mobj = re.search(
                     r'inline(?P<type>Video|Audio|YouTube)Data\.push\((?P<json_data>[^)]+)\);',
                     webpage)
-                if mobj is None:
-                    expired = self._html_search_regex(r'(?s)class="expired-(?:video|audio)".+?<span>(.+?)</span>', webpage, 'expired', None)
-                    if expired:
-                        raise ExtractorError('%s said: %s' % (self.IE_NAME, expired), expected=True)
-                    raise ExtractorError('Unable to extract video urls')
+            if mobj is None:
+                expired = self._html_search_regex(r'(?s)class="expired-(?:video|audio)".+?<span>(.+?)</span>', webpage, 'expired', None)
+                if expired:
+                    raise ExtractorError('%s said: %s' % (self.IE_NAME, expired), expected=True)
+                raise ExtractorError('Unable to extract video urls')
 
             urls_info = self._parse_json(
                 mobj.group('json_data'), video_id, transform_source=js_to_json)

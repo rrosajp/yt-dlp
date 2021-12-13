@@ -58,10 +58,8 @@ class BitChuteIE(InfoExtractor):
             'description', webpage, 'title',
             default=None) or self._og_search_description(webpage)
 
-        format_urls = []
-        for mobj in re.finditer(
-                r'addWebSeed\s*\(\s*(["\'])(?P<url>(?:(?!\1).)+)\1', webpage):
-            format_urls.append(mobj.group('url'))
+        format_urls = [mobj.group('url') for mobj in re.finditer(
+                r'addWebSeed\s*\(\s*(["\'])(?P<url>(?:(?!\1).)+)\1', webpage)]
         format_urls.extend(re.findall(r'as=(https?://[^&"\']+)', webpage))
 
         formats = [

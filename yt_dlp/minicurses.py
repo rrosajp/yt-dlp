@@ -155,11 +155,10 @@ class MultilinePrinter(MultilinePrinterBase):
             prefix = '\r'
             if self._lastlength > textlen:
                 text += ' ' * (self._lastlength - textlen)
-            self._lastlength = textlen
         else:
             # otherwise, break the line
             prefix = '\n'
-            self._lastlength = textlen
+        self._lastlength = textlen
         self.write(prefix, text)
         self._lastline = pos
 

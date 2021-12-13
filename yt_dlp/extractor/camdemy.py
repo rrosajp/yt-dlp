@@ -146,7 +146,7 @@ class CamdemyFolderIE(InfoExtractor):
         # Add displayMode=list so that all links are displayed in a single page
         parsed_url = list(compat_urlparse.urlparse(url))
         query = dict(compat_urlparse.parse_qsl(parsed_url[4]))
-        query.update({'displayMode': 'list'})
+        query['displayMode'] = 'list'
         parsed_url[4] = compat_urllib_parse_urlencode(query)
         final_url = compat_urlparse.urlunparse(parsed_url)
 

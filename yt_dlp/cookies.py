@@ -222,12 +222,11 @@ def _extract_chrome_cookies(browser_name, profile, logger):
     elif _is_path(profile):
         search_root = profile
         config['browser_dir'] = os.path.dirname(profile) if config['supports_profiles'] else profile
+    elif config['supports_profiles']:
+        search_root = os.path.join(config['browser_dir'], profile)
     else:
-        if config['supports_profiles']:
-            search_root = os.path.join(config['browser_dir'], profile)
-        else:
-            logger.error('{} does not support profiles'.format(browser_name))
-            search_root = config['browser_dir']
+        logger.error('{} does not support profiles'.format(browser_name))
+        search_root = config['browser_dir']
 
     cookie_database_path = _find_most_recently_used_file(search_root, 'Cookies')
     if cookie_database_path is None:
@@ -366,17 +365,15 @@ class MacChromeCookieDecryptor(ChromeCookieDecryptor):
         version = encrypted_value[:3]
         ciphertext = encrypted_value[3:]
 
-        if version == b'v10':
-            if self._v10_key is None:
-                self._logger.warning('cannot decrypt v10 cookies: no key found', only_once=True)
-                return None
-
-            return _decrypt_aes_cbc(ciphertext, self._v10_key, self._logger)
-
-        else:
+        if version != b'v10':
             # other prefixes are considered 'old data' which were stored as plaintext
             # https://chromium.googlesource.com/chromium/src/+/refs/heads/main/components/os_crypt/os_crypt_mac.mm
             return encrypted_value
+        if self._v10_key is None:
+            self._logger.warning('cannot decrypt v10 cookies: no key found', only_once=True)
+            return None
+
+        return _decrypt_aes_cbc(ciphertext, self._v10_key, self._logger)
 
 
 class WindowsChromeCookieDecryptor(ChromeCookieDecryptor):
@@ -388,29 +385,27 @@ class WindowsChromeCookieDecryptor(ChromeCookieDecryptor):
         version = encrypted_value[:3]
         ciphertext = encrypted_value[3:]
 
-        if version == b'v10':
-            if self._v10_key is None:
-                self._logger.warning('cannot decrypt v10 cookies: no key found', only_once=True)
-                return None
-
-            # https://chromium.googlesource.com/chromium/src/+/refs/heads/main/components/os_crypt/os_crypt_win.cc
-            #   kNonceLength
-            nonce_length = 96 // 8
-            # boringssl
-            #   EVP_AEAD_AES_GCM_TAG_LEN
-            authentication_tag_length = 16
-
-            raw_ciphertext = ciphertext
-            nonce = raw_ciphertext[:nonce_length]
-            ciphertext = raw_ciphertext[nonce_length:-authentication_tag_length]
-            authentication_tag = raw_ciphertext[-authentication_tag_length:]
-
-            return _decrypt_aes_gcm(ciphertext, self._v10_key, nonce, authentication_tag, self._logger)
-
-        else:
+        if version != b'v10':
             # any other prefix means the data is DPAPI encrypted
             # https://chromium.googlesource.com/chromium/src/+/refs/heads/main/components/os_crypt/os_crypt_win.cc
             return _decrypt_windows_dpapi(encrypted_value, self._logger).decode('utf-8')
+        if self._v10_key is None:
+            self._logger.warning('cannot decrypt v10 cookies: no key found', only_once=True)
+            return None
+
+        # https://chromium.googlesource.com/chromium/src/+/refs/heads/main/components/os_crypt/os_crypt_win.cc
+        #   kNonceLength
+        nonce_length = 96 // 8
+        # boringssl
+        #   EVP_AEAD_AES_GCM_TAG_LEN
+        authentication_tag_length = 16
+
+        raw_ciphertext = ciphertext
+        nonce = raw_ciphertext[:nonce_length]
+        ciphertext = raw_ciphertext[nonce_length:-authentication_tag_length]
+        authentication_tag = raw_ciphertext[-authentication_tag_length:]
+
+        return _decrypt_aes_gcm(ciphertext, self._v10_key, nonce, authentication_tag, self._logger)
 
 
 def _extract_safari_cookies(profile, logger):

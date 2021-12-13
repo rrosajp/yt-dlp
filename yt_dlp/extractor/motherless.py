@@ -236,8 +236,7 @@ class MotherlessGroupIE(InfoExtractor):
                 page_url, group_id, query={'page': idx + 1},
                 note='Downloading page %d/%d' % (idx + 1, page_count)
             )
-            for entry in self._extract_entries(webpage, url):
-                yield entry
+            yield from self._extract_entries(webpage, url)
 
         playlist = InAdvancePagedList(_get_page, page_count, PAGE_SIZE)
 

@@ -327,7 +327,7 @@ class AfreecaTVIE(InfoExtractor):
                     if parsed_date.year < 2000 or parsed_date.year >= 2100:
                         upload_date = None
                 file_duration = int_or_none(file_element.get('duration'))
-                format_id = key if key else '%s_%s' % (video_id, file_num)
+                format_id = key or '%s_%s' % (video_id, file_num)
                 if determine_ext(file_url) == 'm3u8':
                     formats = self._extract_m3u8_formats(
                         file_url, video_id, 'mp4', entry_protocol='m3u8_native',

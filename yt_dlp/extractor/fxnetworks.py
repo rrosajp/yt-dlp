@@ -50,13 +50,9 @@ class FXNetworksIE(AdobePassIE):
             'mbr': 'true',
         }
         if player_type == 'movies':
-            query.update({
-                'manifest': 'm3u',
-            })
+            query['manifest'] = 'm3u'
         else:
-            query.update({
-                'switch': 'http',
-            })
+            query['switch'] = 'http'
         if video_data.get('data-req-auth') == '1':
             resource = self._get_mvpd_resource(
                 video_data['data-channel'], title,

@@ -36,8 +36,8 @@ class EchoMskIE(InfoExtractor):
 
         if air_date:
             air_date = re.sub(r'(\s)\1+', r'\1', air_date)
-            if air_date:
-                title = '%s - %s' % (title, air_date)
+        if air_date:
+            title = '%s - %s' % (title, air_date)
 
         return {
             'id': video_id,

@@ -163,10 +163,9 @@ class EaglePlatformIE(InfoExtractor):
             m3u8_id='hls', fatal=False)
         formats.extend(m3u8_formats)
 
-        m3u8_formats_dict = {}
-        for f in m3u8_formats:
-            if f.get('height') is not None:
-                m3u8_formats_dict[f['height']] = f
+        m3u8_formats_dict = {
+            f['height']: f for f in m3u8_formats if f.get('height') is not None
+        }
 
         mp4_data = self._download_json(
             # Secure mp4 URL is constructed according to Player.prototype.mp4 from

@@ -417,12 +417,14 @@ class BrightcoveNewIE(AdobePassIE):
         # 4. http://docs.brightcove.com/en/video-cloud/brightcove-player/guides/in-page-embed-player-implementation.html
         # 5. https://support.brightcove.com/en/video-cloud/docs/dynamically-assigning-videos-player
 
-        entries = []
+        entries = [
+            url if url.startswith('http') else 'http:' + url
+            for _, url in re.findall(
+                r'<iframe[^>]+src=(["\'])((?:https?:)?//players\.brightcove\.net/\d+/[^/]+/index\.html.+?)\1',
+                webpage,
+            )
+        ]
 
-        # Look for iframe embeds [1]
-        for _, url in re.findall(
-                r'<iframe[^>]+src=(["\'])((?:https?:)?//players\.brightcove\.net/\d+/[^/]+/index\.html.+?)\1', webpage):
-            entries.append(url if url.startswith('http') else 'http:' + url)
 
         # Look for <video> tags [2] and embed_in_page embeds [3]
         # [2] looks like:
@@ -623,13 +625,13 @@ class BrightcoveNewIE(AdobePassIE):
                 if catalog:
                     catalog = self._parse_json(
                         js_to_json(catalog), video_id, fatal=False)
-                    if catalog:
-                        policy_key = catalog.get('policyKey')
+                if catalog:
+                    policy_key = catalog.get('policyKey')
 
-                if not policy_key:
-                    policy_key = self._search_regex(
-                        r'policyKey\s*:\s*(["\'])(?P<pk>.+?)\1',
-                        webpage, 'policy key', group='pk')
+            if not policy_key:
+                policy_key = self._search_regex(
+                    r'policyKey\s*:\s*(["\'])(?P<pk>.+?)\1',
+                    webpage, 'policy key', group='pk')
 
             store_pk(policy_key)
             return policy_key

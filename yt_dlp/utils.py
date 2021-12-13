@@ -2102,19 +2102,15 @@ def sanitize_open(filename, open_mode):
         alt_filename = sanitize_path(filename)
         if alt_filename == filename:
             raise
-        else:
-            # An exception here should be caught in the caller
-            stream = open(encodeFilename(alt_filename), open_mode)
-            return (stream, alt_filename)
+        # An exception here should be caught in the caller
+        stream = open(encodeFilename(alt_filename), open_mode)
+        return (stream, alt_filename)
 
 
 def timeconvert(timestr):
     """Convert RFC 2822 defined time string into system timestamp"""
-    timestamp = None
     timetuple = email.utils.parsedate_tz(timestr)
-    if timetuple is not None:
-        timestamp = email.utils.mktime_tz(timetuple)
-    return timestamp
+    return email.utils.mktime_tz(timetuple) if timetuple is not None else None
 
 
 def sanitize_filename(s, restricted=False, is_id=False):
@@ -2733,7 +2729,12 @@ def handle_youtubedl_headers(headers):
     filtered_headers = headers
 
     if 'Youtubedl-no-compression' in filtered_headers:
-        filtered_headers = dict((k, v) for k, v in filtered_headers.items() if k.lower() != 'accept-encoding')
+        filtered_headers = {
+            k: v
+            for k, v in filtered_headers.items()
+            if k.lower() != 'accept-encoding'
+        }
+
         del filtered_headers['Youtubedl-no-compression']
 
     return filtered_headers
@@ -2975,18 +2976,9 @@ class YoutubeDLCookieJar(compat_cookiejar.MozillaCookieJar):
                     continue
                 if not ignore_expires and cookie.is_expired(now):
                     continue
-                if cookie.secure:
-                    secure = 'TRUE'
-                else:
-                    secure = 'FALSE'
-                if cookie.domain.startswith('.'):
-                    initial_dot = 'TRUE'
-                else:
-                    initial_dot = 'FALSE'
-                if cookie.expires is not None:
-                    expires = compat_str(cookie.expires)
-                else:
-                    expires = ''
+                secure = 'TRUE' if cookie.secure else 'FALSE'
+                initial_dot = 'TRUE' if cookie.domain.startswith('.') else 'FALSE'
+                expires = compat_str(cookie.expires) if cookie.expires is not None else ''
                 if cookie.value is None:
                     # cookies.txt regards 'Set-Cookie: foo' as a cookie
                     # with no name, whereas http.cookiejar regards it as a
@@ -3102,8 +3094,9 @@ class YoutubeDLRedirectHandler(compat_urllib_request.HTTPRedirectHandler):
         but another Handler might.
         """
         m = req.get_method()
-        if (not (code in (301, 302, 303, 307, 308) and m in ("GET", "HEAD")
-                 or code in (301, 302, 303) and m == "POST")):
+        if (
+            code not in (301, 302, 303, 307, 308) or m not in ("GET", "HEAD")
+        ) and (code not in (301, 302, 303) or m != "POST"):
             raise compat_HTTPError(req.full_url, code, msg, headers, fp)
         # Strictly (according to RFC 2616), 301 or 302 in response to
         # a POST MUST NOT cause a redirection without confirmation
@@ -3124,8 +3117,8 @@ class YoutubeDLRedirectHandler(compat_urllib_request.HTTPRedirectHandler):
 
         CONTENT_HEADERS = ("content-length", "content-type")
         # NB: don't use dict comprehension for python 2.6 compatibility
-        newheaders = dict((k, v) for k, v in req.headers.items()
-                          if k.lower() not in CONTENT_HEADERS)
+        newheaders = {k: v for k, v in req.headers.items()
+                              if k.lower() not in CONTENT_HEADERS}
         return compat_urllib_request.Request(
             newurl, headers=newheaders, origin_req_host=req.origin_req_host,
             unverifiable=True)
@@ -3284,7 +3277,7 @@ def datetime_from_str(date_str, precision='auto', format='%Y%m%d'):
         start_time = datetime_from_str(match.group('start'), precision, format)
         time = int(match.group('time')) * (-1 if match.group('sign') == '-' else 1)
         unit = match.group('unit')
-        if unit == 'month' or unit == 'year':
+        if unit in ['month', 'year']:
             new_date = datetime_add_months(start_time, time * 12 if unit == 'year' else time)
             unit = 'day'
         else:
@@ -3476,9 +3469,13 @@ def write_string(s, out=None, encoding=None):
         out = sys.stderr
     assert type(s) == compat_str
 
-    if sys.platform == 'win32' and encoding is None and hasattr(out, 'fileno'):
-        if _windows_write_string(s, out):
-            return
+    if (
+        sys.platform == 'win32'
+        and encoding is None
+        and hasattr(out, 'fileno')
+        and _windows_write_string(s, out)
+    ):
+        return
 
     if ('b' in getattr(out, 'mode', '')
             or sys.version_info[0] < 3):  # Python 2 lies about mode of sys.stderr
@@ -3654,10 +3651,7 @@ def format_bytes(bytes):
         return 'N/A'
     if type(bytes) is str:
         bytes = float(bytes)
-    if bytes == 0.0:
-        exponent = 0
-    else:
-        exponent = int(math.log(bytes, 1024.0))
+    exponent = 0 if bytes == 0.0 else int(math.log(bytes, 1024.0))
     suffix = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'][exponent]
     converted = float(bytes) / float(1024 ** exponent)
     return '%.2f%s' % (converted, suffix)
@@ -3835,12 +3829,7 @@ def setproctitle(title):
 
     try:
         libc = ctypes.cdll.LoadLibrary('libc.so.6')
-    except OSError:
-        return
-    except TypeError:
-        # LoadLibrary in Windows Python 2.7.13 only expects
-        # a bytestring, but since unicode_literals turns
-        # every string into a unicode string, it fails.
+    except (OSError, TypeError):
         return
     title_bytes = title.encode('utf-8')
     buf = ctypes.create_string_buffer(len(title_bytes))
@@ -3908,9 +3897,8 @@ class PUTRequest(compat_urllib_request.Request):
 
 
 def int_or_none(v, scale=1, default=None, get_attr=None, invscale=1):
-    if get_attr:
-        if v is not None:
-            v = getattr(v, get_attr, None)
+    if get_attr and v is not None:
+        v = getattr(v, get_attr, None)
     if v == '':
         v = None
     if v is None:
@@ -4611,8 +4599,8 @@ def limit_length(s, length):
     """ Add ellipses to overly long strings """
     if s is None:
         return None
-    ELLIPSES = '...'
     if len(s) > length:
+        ELLIPSES = '...'
         return s[:length - len(ELLIPSES)] + ELLIPSES
     return s
 
@@ -4957,9 +4945,8 @@ def match_filter_func(filter_str):
     def _match_func(info_dict, *args, **kwargs):
         if match_str(filter_str, info_dict, *args, **kwargs):
             return None
-        else:
-            video_title = info_dict.get('title', info_dict.get('id', 'video'))
-            return '%s does not pass filter %s, skipping ..' % (video_title, filter_str)
+        video_title = info_dict.get('title', info_dict.get('id', 'video'))
+        return '%s does not pass filter %s, skipping ..' % (video_title, filter_str)
     return _match_func
 
 
@@ -5971,7 +5958,7 @@ def long_to_bytes(n, blocksize=0):
     n = int(n)
     while n > 0:
         s = compat_struct_pack('>I', n & 0xffffffff) + s
-        n = n >> 32
+        n >>= 32
     # strip off leading zeros
     for i in range(len(s)):
         if s[i] != b'\000'[0]:
@@ -5999,7 +5986,7 @@ def bytes_to_long(s):
     if length % 4:
         extra = (4 - length % 4)
         s = b'\000' * extra + s
-        length = length + extra
+        length += extra
     for i in range(0, length, 4):
         acc = (acc << 32) + compat_struct_unpack('>I', s[i:i + 4])[0]
     return acc
@@ -6275,19 +6262,17 @@ def write_xattr(path, key, value):
                 if p.returncode != 0:
                     raise XAttrMetadataError(p.returncode, stderr)
 
+            elif sys.platform.startswith('linux'):
+                raise XAttrUnavailableError(
+                    "Couldn't find a tool to set the xattrs. "
+                    "Install either the python 'pyxattr' or 'xattr' "
+                    "modules, or the GNU 'attr' package "
+                    "(which contains the 'setfattr' tool).")
             else:
-                # On Unix, and can't find pyxattr, setfattr, or xattr.
-                if sys.platform.startswith('linux'):
-                    raise XAttrUnavailableError(
-                        "Couldn't find a tool to set the xattrs. "
-                        "Install either the python 'pyxattr' or 'xattr' "
-                        "modules, or the GNU 'attr' package "
-                        "(which contains the 'setfattr' tool).")
-                else:
-                    raise XAttrUnavailableError(
-                        "Couldn't find a tool to set the xattrs. "
-                        "Install either the python 'xattr' module, "
-                        "or the 'xattr' binary.")
+                raise XAttrUnavailableError(
+                    "Couldn't find a tool to set the xattrs. "
+                    "Install either the python 'xattr' module, "
+                    "or the 'xattr' binary.")
 
 
 def random_birthday(year_field, month_field, day_field):
@@ -6510,14 +6495,14 @@ def traverse_obj(
                     obj = enumerate(obj)
                 elif isinstance(obj, dict):
                     obj = obj.items()
+                elif not traverse_string:
+                    return None
                 else:
-                    if not traverse_string:
-                        return None
                     obj = str(obj)
                 _current_depth += 1
                 depth = max(depth, _current_depth)
                 return [_traverse_obj(v, path[i + 1:], _current_depth) for k, v in obj if key(k)]
-            elif isinstance(obj, dict) and not (is_user_input and key == ':'):
+            elif isinstance(obj, dict) and (not is_user_input or key != ':'):
                 obj = (obj.get(key) if casesense or (key in obj)
                        else next((v for k, v in obj.items() if _lower(k) == key), None))
             else:
@@ -6531,7 +6516,8 @@ def traverse_obj(
                 if not isinstance(obj, (list, tuple, LazyList)):
                     if not traverse_string:
                         return None
-                    obj = str(obj)
+                    else:
+                        obj = str(obj)
                 try:
                     obj = obj[key]
                 except IndexError:
@@ -6588,15 +6574,13 @@ def jwt_encode_hs256(payload_data, key, headers={}):
     payload_b64 = base64.b64encode(json.dumps(payload_data).encode('utf-8'))
     h = hmac.new(key.encode('utf-8'), header_b64 + b'.' + payload_b64, hashlib.sha256)
     signature_b64 = base64.b64encode(h.digest())
-    token = header_b64 + b'.' + payload_b64 + b'.' + signature_b64
-    return token
+    return header_b64 + b'.' + payload_b64 + b'.' + signature_b64
 
 
 # can be extended in future to verify the signature and parse header and return the algorithm used if it's not HS256
 def jwt_decode_hs256(jwt):
     header_b64, payload_b64, signature_b64 = jwt.split('.')
-    payload_data = json.loads(base64.urlsafe_b64decode(payload_b64))
-    return payload_data
+    return json.loads(base64.urlsafe_b64decode(payload_b64))
 
 
 def supports_terminal_sequences(stream):

@@ -421,10 +421,7 @@ class BBCCoUkIE(InfoExtractor):
                                 'vcodec': 'none',
                             })
                         if protocol in ('http', 'https'):
-                            # Direct link
-                            fmt.update({
-                                'url': href,
-                            })
+                            fmt['url'] = href
                         elif protocol == 'rtmp':
                             application = connection.get('application', 'ondemand')
                             auth_string = connection.get('authString')
@@ -1400,10 +1397,8 @@ class BBCCoUkIPlayerPlaylistBaseIE(InfoExtractor):
             episode_id = episode.get('id')
             if not episode_id:
                 continue
-            thumbnail = None
             image = self._get_episode_image(episode)
-            if image:
-                thumbnail = image.replace('{recipe}', 'raw')
+            thumbnail = image.replace('{recipe}', 'raw') if image else None
             category = self._get_default(episode, 'labels', 'category')
             yield {
                 '_type': 'url',

@@ -11,25 +11,19 @@ from ..utils import (
 
 def _decrypt_config(key, string):
     a = ''
-    i = ''
-    r = ''
-
     while len(a) < (len(string) / 2):
         a += key
 
-    a = a[0:int(len(string) / 2)]
+    a = a[:int(len(string) / 2)]
 
-    t = 0
-    while t < len(string):
-        i += chr(int(string[t] + string[t + 1], 16))
-        t += 2
+    i = ''.join(
+        chr(int(string[t] + string[t + 1], 16))
+        for t in range(0, len(string), 2)
+    )
 
-    icko = [s for s in i]
+    icko = list(i)
 
-    for t, c in enumerate(a):
-        r += chr(ord(c) ^ ord(icko[t]))
-
-    return r
+    return ''.join(chr(ord(c) ^ ord(icko[t])) for t, c in enumerate(a))
 
 
 class EscapistIE(InfoExtractor):

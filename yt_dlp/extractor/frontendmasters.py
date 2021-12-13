@@ -78,11 +78,12 @@ class FrontendMastersPageBaseIE(FrontendMastersBaseIE):
 
     @staticmethod
     def _extract_chapters(course):
-        chapters = []
         lesson_elements = course.get('lessonElements')
-        if isinstance(lesson_elements, list):
-            chapters = [url_or_none(e) for e in lesson_elements if url_or_none(e)]
-        return chapters
+        return (
+            [url_or_none(e) for e in lesson_elements if url_or_none(e)]
+            if isinstance(lesson_elements, list)
+            else []
+        )
 
     @staticmethod
     def _extract_lesson(chapters, lesson_id, lesson):

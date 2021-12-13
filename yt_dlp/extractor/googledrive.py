@@ -130,7 +130,7 @@ class GoogleDriveIE(InfoExtractor):
                     'kind': '',
                 }
                 if origin_lang_code is not None:
-                    query.update({'tlang': caption_lang_code})
+                    query['tlang'] = caption_lang_code
                 caption_format_data.append({
                     'url': update_url_query(self._BASE_URL_CAPTIONS, query),
                     'ext': caption_format,

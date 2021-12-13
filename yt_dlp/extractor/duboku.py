@@ -32,8 +32,9 @@ def _get_elements_by_tag_and_attrib(html, tag=None, attribute=None, value=None, 
         value = re.escape(value) if escape_value else value
         value = '=[\'"]?(?P<value>%s)[\'"]?' % value
 
-    retlist = []
-    for m in re.finditer(r'''(?xs)
+    return list(
+        re.finditer(
+            r'''(?xs)
         <(?P<tag>%s)
          (?:\s+[a-zA-Z0-9:._-]+(?:=[a-zA-Z0-9:._-]*|="[^"]*"|='[^']*'|))*?
          %s%s
@@ -41,10 +42,11 @@ def _get_elements_by_tag_and_attrib(html, tag=None, attribute=None, value=None, 
         \s*>
         (?P<content>.*?)
         </\1>
-    ''' % (tag, attribute, value), html):
-        retlist.append(m)
-
-    return retlist
+    '''
+            % (tag, attribute, value),
+            html,
+        )
+    )
 
 
 def _get_element_by_tag_and_attrib(html, tag=None, attribute=None, value=None, escape_value=True):
@@ -211,13 +213,20 @@ class DubokuPlaylistIE(InfoExtractor):
         for div in _get_elements_by_tag_and_attrib(
                 webpage_html, attribute='id', value='playlist\\d+', escape_value=False):
             playlist_id = div.group('value')
-            playlist = []
-            for a in _get_elements_by_tag_and_attrib(
-                    div.group('content'), 'a', 'href', value='[^\'"]+?', escape_value=False):
-                playlist.append({
+            playlist = [
+                {
                     'href': unescapeHTML(a.group('value')),
-                    'title': unescapeHTML(a.group('content'))
-                })
+                    'title': unescapeHTML(a.group('content')),
+                }
+                for a in _get_elements_by_tag_and_attrib(
+                    div.group('content'),
+                    'a',
+                    'href',
+                    value='[^\'"]+?',
+                    escape_value=False,
+                )
+            ]
+
             playlists[playlist_id] = playlist
 
         # select the specified playlist if url fragment exists

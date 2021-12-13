@@ -47,9 +47,7 @@ class CCCIE(InfoExtractor):
                 continue
             language = recording.get('language')
             folder = recording.get('folder')
-            format_id = None
-            if language:
-                format_id = language
+            format_id = language or None
             if folder:
                 if language:
                     format_id += '-' + folder
@@ -58,15 +56,20 @@ class CCCIE(InfoExtractor):
             vcodec = 'h264' if 'h264' in folder else (
                 'none' if folder in ('mp3', 'opus') else None
             )
-            formats.append({
-                'format_id': format_id,
-                'url': recording_url,
-                'width': int_or_none(recording.get('width')),
-                'height': int_or_none(recording.get('height')),
-                'filesize': int_or_none(recording.get('size'), invscale=1024 * 1024),
-                'language': language,
-                'vcodec': vcodec,
-            })
+            formats.append(
+                {
+                    'format_id': format_id,
+                    'url': recording_url,
+                    'width': int_or_none(recording.get('width')),
+                    'height': int_or_none(recording.get('height')),
+                    'filesize': int_or_none(
+                        recording.get('size'), invscale=1024 ** 2
+                    ),
+                    'language': language,
+                    'vcodec': vcodec,
+                }
+            )
+
         self._sort_formats(formats)
 
         return {

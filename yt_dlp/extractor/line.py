@@ -102,14 +102,16 @@ class LineLiveBaseIE(InfoExtractor):
         title = item['title']
         is_live = item.get('isBroadcastingNow')
 
-        thumbnails = []
-        for thumbnail_id, thumbnail_url in (item.get('thumbnailURLs') or {}).items():
-            if not thumbnail_url:
-                continue
-            thumbnails.append({
+        thumbnails = [
+            {
                 'id': thumbnail_id,
                 'url': thumbnail_url,
-            })
+            }
+            for thumbnail_id, thumbnail_url in (
+                item.get('thumbnailURLs') or {}
+            ).items()
+            if thumbnail_url
+        ]
 
         channel = item.get('channel') or {}
         channel_id = str_or_none(channel.get('id'))

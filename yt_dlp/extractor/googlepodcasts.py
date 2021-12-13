@@ -77,9 +77,10 @@ class GooglePodcastsFeedIE(GooglePodcastsBaseIE):
         b64_feed_url = self._match_id(url)
         data = self._batch_execute('ncqJEe', b64_feed_url, [b64_feed_url])
 
-        entries = []
-        for episode in (try_get(data, lambda x: x[1][0]) or []):
-            entries.append(self._extract_episode(episode))
+        entries = [
+            self._extract_episode(episode)
+            for episode in (try_get(data, lambda x: x[1][0]) or [])
+        ]
 
         feed = try_get(data, lambda x: x[3]) or []
         return self.playlist_result(

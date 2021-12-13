@@ -46,10 +46,7 @@ class ImgGamingBaseIE(InfoExtractor):
 
     def _extract_dve_api_url(self, media_id, media_type):
         stream_path = 'stream'
-        if media_type == 'video':
-            stream_path += '/vod/'
-        else:
-            stream_path += '?eventId='
+        stream_path += '/vod/' if media_type == 'video' else '?eventId='
         try:
             return self._call_api(
                 stream_path, media_id)['playerUrlCallback']

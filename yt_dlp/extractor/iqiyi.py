@@ -49,9 +49,11 @@ class IqiyiSDK(object):
 
     def preprocess(self, chunksize):
         self.target = md5_text(self.target)
-        chunks = []
-        for i in range(32 // chunksize):
-            chunks.append(self.target[chunksize * i:chunksize * (i + 1)])
+        chunks = [
+            self.target[chunksize * i : chunksize * (i + 1)]
+            for i in range(32 // chunksize)
+        ]
+
         if 32 % chunksize:
             chunks.append(self.target[32 - 32 % chunksize:])
         return chunks, list(map(int, self.ip.split('.')))
@@ -71,10 +73,7 @@ class IqiyiSDK(object):
         ret = ''
         for i in range(len(chunks)):
             ip_part = compat_str(ip[i] % modulus_map[chunksize]) if i < 4 else ''
-            if chunksize == 8:
-                ret += ip_part + chunks[i]
-            else:
-                ret += chunks[i] + ip_part
+            ret += ip_part + chunks[i] if chunksize == 8 else chunks[i] + ip_part
         self.target = ret
 
     def handle_input16(self):

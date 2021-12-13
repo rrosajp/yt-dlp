@@ -311,11 +311,14 @@ class FacebookIE(InfoExtractor):
 
     @staticmethod
     def _extract_urls(webpage):
-        urls = []
-        for mobj in re.finditer(
+        urls = [
+            mobj.group('url')
+            for mobj in re.finditer(
                 r'<iframe[^>]+?src=(["\'])(?P<url>https?://www\.facebook\.com/(?:video/embed|plugins/video\.php).+?)\1',
-                webpage):
-            urls.append(mobj.group('url'))
+                webpage,
+            )
+        ]
+
         # Facebook API embed
         # see https://developers.facebook.com/docs/plugins/embedded-video-player
         for mobj in re.finditer(r'''(?x)<div[^>]+

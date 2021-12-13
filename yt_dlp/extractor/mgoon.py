@@ -62,16 +62,14 @@ class MgoonIE(InfoExtractor):
         if data.get('accessInfo', {}).get('code') == 'VIDEO_STATUS_ADULT':
             age_limit = 18
 
-        formats = []
         get_quality = qualities(['360p', '480p', '720p', '1080p'])
-        for fmt in data['videoFiles']:
-            formats.append({
+        formats = [{
                 'format_id': fmt['label'],
                 'quality': get_quality(fmt['label']),
                 'url': fmt['url'],
                 'ext': fmt['format'],
 
-            })
+            } for fmt in data['videoFiles']]
         self._sort_formats(formats)
 
         return {

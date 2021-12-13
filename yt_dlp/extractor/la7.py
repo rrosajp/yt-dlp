@@ -222,10 +222,12 @@ class LA7PodcastIE(LA7PodcastEpisodeIE):
             r'window\.ppN\s*=\s*([\'"])(?P<ppn>.+?)\1',
             webpage, 'ppn', group='ppn', default=None)
 
-        entries = []
-        for episode in re.finditer(
+        entries = [
+            self._extract_info(episode.group(1), ppn=ppn)
+            for episode in re.finditer(
                 r'<div class="container-podcast-property">([\s\S]+?)(?:</div>\s*){3}',
-                webpage):
-            entries.append(self._extract_info(episode.group(1), ppn=ppn))
+                webpage,
+            )
+        ]
 
         return self.playlist_result(entries, playlist_id, title)

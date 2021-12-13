@@ -224,8 +224,6 @@ class IPrimaCNNIE(InfoExtractor):
                     m3u8_id='hls', fatal=False)
             elif format_key == 'dash' or ext == 'mpd':
                 return
-                new_formats = self._extract_mpd_formats(
-                    format_url, video_id, mpd_id='dash', fatal=False)
             if lang:
                 for f in new_formats:
                     if not f.get('language'):

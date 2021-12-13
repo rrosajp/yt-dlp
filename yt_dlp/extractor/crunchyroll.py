@@ -321,10 +321,7 @@ class CrunchyrollIE(CrunchyrollBaseIE, VRVIE):
         output = ''
 
         def ass_bool(strvalue):
-            assvalue = '0'
-            if strvalue == '1':
-                assvalue = '-1'
-            return assvalue
+            return '-1' if strvalue == '1' else '0'
 
         output = '[Script Info]\n'
         output += 'Title: %s\n' % sub_root.attrib['title']
