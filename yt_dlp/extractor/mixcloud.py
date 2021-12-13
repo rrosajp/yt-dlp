@@ -215,10 +215,7 @@ class MixcloudPlaylistBaseIE(MixcloudBaseIE):
     def _real_extract(self, url):
         username, slug = self._match_valid_url(url).groups()
         username = compat_urllib_parse_unquote(username)
-        if not slug:
-            slug = 'uploads'
-        else:
-            slug = compat_urllib_parse_unquote(slug)
+        slug = 'uploads' if not slug else compat_urllib_parse_unquote(slug)
         playlist_id = '%s_%s' % (username, slug)
 
         is_playlist_type = self._ROOT_TYPE == 'playlist'

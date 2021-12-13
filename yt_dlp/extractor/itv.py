@@ -249,7 +249,10 @@ class ITVBTCCIE(InfoExtractor):
 
         entries = []
         for video in json_map:
-            if not any(video['data'].get(attr) == 'Brightcove' for attr in ('name', 'type')):
+            if all(
+                video['data'].get(attr) != 'Brightcove'
+                for attr in ('name', 'type')
+            ):
                 continue
             video_id = video['data']['id']
             account_id = video['data']['accountId']

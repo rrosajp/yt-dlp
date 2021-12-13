@@ -136,9 +136,8 @@ class EightTracksIE(InfoExtractor):
                 except ExtractorError:
                     if download_tries > 3:
                         raise
-                    else:
-                        download_tries += 1
-                        self._sleep(avg_song_duration, playlist_id)
+                    download_tries += 1
+                    self._sleep(avg_song_duration, playlist_id)
 
             api_data = json.loads(api_json)
             track_data = api_data['set']['track']

@@ -64,7 +64,7 @@ class BostonGlobeIE(InfoExtractor):
                     'http://players.brightcove.net/%s/%s_%s/index.html?videoId=%s'
                     % (account_id, player_id, embed, video_id))
 
-        if len(entries) == 0:
+        if not entries:
             return self.url_result(url, 'Generic')
         elif len(entries) == 1:
             return self.url_result(entries[0], 'BrightcoveNew')

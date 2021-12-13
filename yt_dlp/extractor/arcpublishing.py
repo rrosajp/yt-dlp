@@ -126,7 +126,7 @@ class ArcPublishingIE(InfoExtractor):
                 m3u8_formats = self._extract_m3u8_formats(
                     s_url, uuid, 'mp4', 'm3u8' if is_live else 'm3u8_native',
                     m3u8_id='hls', fatal=False)
-                if all([f.get('acodec') == 'none' for f in m3u8_formats]):
+                if all(f.get('acodec') == 'none' for f in m3u8_formats):
                     continue
                 for f in m3u8_formats:
                     height = f.get('height')

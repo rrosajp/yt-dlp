@@ -440,9 +440,12 @@ class InstagramPlaylistBaseIE(InstagramBaseIE):
                 except ExtractorError as e:
                     # if it's an error caused by a bad query, and there are
                     # more GIS templates to try, ignore it and keep trying
-                    if isinstance(e.cause, compat_HTTPError) and e.cause.code == 403:
-                        if gis_tmpl != gis_tmpls[-1]:
-                            continue
+                    if (
+                        isinstance(e.cause, compat_HTTPError)
+                        and e.cause.code == 403
+                        and gis_tmpl != gis_tmpls[-1]
+                    ):
+                        continue
                     raise
 
             nodes = traverse_obj(media, ('edges', ..., 'node'), expected_type=dict) or []

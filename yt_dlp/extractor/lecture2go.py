@@ -44,9 +44,9 @@ class Lecture2GoIE(InfoExtractor):
                 formats.extend(self._extract_f4m_formats(url, video_id, f4m_id='hds'))
             elif ext == 'm3u8':
                 formats.extend(self._extract_m3u8_formats(url, video_id, ext='mp4', m3u8_id='hls'))
+            elif protocol == 'rtmp':
+                continue  # XXX: currently broken
             else:
-                if protocol == 'rtmp':
-                    continue  # XXX: currently broken
                 formats.append({
                     'format_id': protocol,
                     'url': url,

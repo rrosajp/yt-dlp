@@ -118,8 +118,10 @@ class ACastChannelIE(ACastBaseIE):
         show_slug = self._match_id(url)
         show = self._call_api(show_slug, show_slug)
         show_info = self._extract_show_info(show)
-        entries = []
-        for episode in (show.get('episodes') or []):
-            entries.append(self._extract_episode(episode, show_info))
+        entries = [
+            self._extract_episode(episode, show_info)
+            for episode in (show.get('episodes') or [])
+        ]
+
         return self.playlist_result(
             entries, show.get('id'), show.get('title'), show.get('description'))

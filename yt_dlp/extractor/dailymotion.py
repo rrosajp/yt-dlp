@@ -192,12 +192,14 @@ class DailymotionIE(DailymotionBaseInfoExtractor):
 
     @staticmethod
     def _extract_urls(webpage):
-        urls = []
-        # Look for embedded Dailymotion player
-        # https://developer.dailymotion.com/player#player-parameters
-        for mobj in re.finditer(
-                r'<(?:(?:embed|iframe)[^>]+?src=|input[^>]+id=[\'"]dmcloudUrlEmissionSelect[\'"][^>]+value=)(["\'])(?P<url>(?:https?:)?//(?:www\.)?dailymotion\.com/(?:embed|swf)/video/.+?)\1', webpage):
-            urls.append(unescapeHTML(mobj.group('url')))
+        urls = [
+            unescapeHTML(mobj.group('url'))
+            for mobj in re.finditer(
+                r'<(?:(?:embed|iframe)[^>]+?src=|input[^>]+id=[\'"]dmcloudUrlEmissionSelect[\'"][^>]+value=)(["\'])(?P<url>(?:https?:)?//(?:www\.)?dailymotion\.com/(?:embed|swf)/video/.+?)\1',
+                webpage,
+            )
+        ]
+
         for mobj in re.finditer(
                 r'(?s)DM\.player\([^,]+,\s*{.*?video[\'"]?\s*:\s*["\']?(?P<id>[0-9a-zA-Z]+).+?}\s*\);', webpage):
             urls.append('https://www.dailymotion.com/embed/video/' + mobj.group('id'))
@@ -284,21 +286,22 @@ class DailymotionIE(DailymotionBaseInfoExtractor):
                 f['fps'] = 60
         self._sort_formats(formats)
 
-        subtitles = {}
         subtitles_data = try_get(metadata, lambda x: x['subtitles']['data'], dict) or {}
-        for subtitle_lang, subtitle in subtitles_data.items():
-            subtitles[subtitle_lang] = [{
-                'url': subtitle_url,
-            } for subtitle_url in subtitle.get('urls', [])]
+        subtitles = {
+            subtitle_lang: [
+                {
+                    'url': subtitle_url,
+                }
+                for subtitle_url in subtitle.get('urls', [])
+            ]
+            for subtitle_lang, subtitle in subtitles_data.items()
+        }
 
-        thumbnails = []
-        for height, poster_url in metadata.get('posters', {}).items():
-            thumbnails.append({
+        thumbnails = [{
                 'height': int_or_none(height),
                 'id': height,
                 'url': poster_url,
-            })
-
+            } for height, poster_url in metadata.get('posters', {}).items()]
         owner = metadata.get('owner') or {}
         stats = media.get('stats') or {}
         get_count = lambda x: int_or_none(try_get(stats, lambda y: y[x + 's']['total']))

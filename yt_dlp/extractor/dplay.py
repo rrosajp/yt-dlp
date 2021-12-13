@@ -58,13 +58,10 @@ class DPlayBaseIE(InfoExtractor):
         streaming = self._download_json(
             disco_base + 'playback/videoPlaybackInfo/' + video_id,
             video_id, headers=headers)['data']['attributes']['streaming']
-        streaming_list = []
-        for format_id, format_dict in streaming.items():
-            streaming_list.append({
+        return [{
                 'type': format_id,
                 'url': format_dict.get('url'),
-            })
-        return streaming_list
+            } for format_id, format_dict in streaming.items()]
 
     def _get_disco_api_info(self, url, display_id, disco_host, realm, country, domain=''):
         geo_countries = [country.upper()]

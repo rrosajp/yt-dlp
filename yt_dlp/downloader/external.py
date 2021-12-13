@@ -138,10 +138,9 @@ class ExternalFD(FragmentFD):
                 self.to_screen(
                     '[%s] Got error. Retrying fragments (attempt %d of %s)...'
                     % (self.get_basename(), count, self.format_retries(fragment_retries)))
-        if count > fragment_retries:
-            if not skip_unavailable_fragments:
-                self.report_error('Giving up after %s fragment retries' % fragment_retries)
-                return -1
+        if count > fragment_retries and not skip_unavailable_fragments:
+            self.report_error('Giving up after %s fragment retries' % fragment_retries)
+            return -1
 
         decrypt_fragment = self.decrypter(info_dict)
         dest, _ = sanitize_open(tmpfilename, 'wb')
@@ -496,11 +495,8 @@ class AVconvFD(FFmpegFD):
     pass
 
 
-_BY_NAME = dict(
-    (klass.get_basename(), klass)
-    for name, klass in globals().items()
-    if name.endswith('FD') and name not in ('ExternalFD', 'FragmentFD')
-)
+_BY_NAME = {klass.get_basename(): klass for name, klass in globals().items()
+    if name.endswith('FD') and name not in ('ExternalFD', 'FragmentFD')}
 
 
 def list_external_downloaders():

@@ -2490,9 +2490,9 @@ class GenericIE(InfoExtractor):
 
         for o in range(len(newmagic) - 1, -1, -1):
             new = ''
-            l = (o + sum([int(n) for n in license[o:]])) % 32
+            l = (o + sum(int(n) for n in license[o:])) % 32
 
-            for i in range(0, len(newmagic)):
+            for i in range(len(newmagic)):
                 if i == o:
                     new += newmagic[l]
                 elif i == l:
@@ -2512,7 +2512,7 @@ class GenericIE(InfoExtractor):
 
         modlicense = str(4 * abs(fronthalf - backhalf))
         retval = ''
-        for o in range(0, center + 1):
+        for o in range(center + 1):
             for i in range(1, 5):
                 retval += str((int(license[o + i]) + int(modlicense[o])) % 10)
         return retval

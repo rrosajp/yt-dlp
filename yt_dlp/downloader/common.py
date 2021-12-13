@@ -315,11 +315,10 @@ class FileDownloader(object):
             s['_percent_str'] = self.format_percent(100 * s['downloaded_bytes'] / s['total_bytes'])
         elif s.get('total_bytes_estimate') and s.get('downloaded_bytes') is not None:
             s['_percent_str'] = self.format_percent(100 * s['downloaded_bytes'] / s['total_bytes_estimate'])
+        elif s.get('downloaded_bytes') == 0:
+            s['_percent_str'] = self.format_percent(0)
         else:
-            if s.get('downloaded_bytes') == 0:
-                s['_percent_str'] = self.format_percent(0)
-            else:
-                s['_percent_str'] = 'Unknown %'
+            s['_percent_str'] = 'Unknown %'
 
         if s.get('speed') is not None:
             s['_speed_str'] = self.format_speed(s['speed'])
@@ -332,20 +331,20 @@ class FileDownloader(object):
         elif s.get('total_bytes_estimate') is not None:
             s['_total_bytes_estimate_str'] = format_bytes(s['total_bytes_estimate'])
             msg_template = '%(_percent_str)s of ~%(_total_bytes_estimate_str)s at %(_speed_str)s ETA %(_eta_str)s'
-        else:
-            if s.get('downloaded_bytes') is not None:
-                s['_downloaded_bytes_str'] = format_bytes(s['downloaded_bytes'])
-                if s.get('elapsed'):
-                    s['_elapsed_str'] = self.format_seconds(s['elapsed'])
-                    msg_template = '%(_downloaded_bytes_str)s at %(_speed_str)s (%(_elapsed_str)s)'
-                else:
-                    msg_template = '%(_downloaded_bytes_str)s at %(_speed_str)s'
+        elif s.get('downloaded_bytes') is not None:
+            s['_downloaded_bytes_str'] = format_bytes(s['downloaded_bytes'])
+            if s.get('elapsed'):
+                s['_elapsed_str'] = self.format_seconds(s['elapsed'])
+                msg_template = '%(_downloaded_bytes_str)s at %(_speed_str)s (%(_elapsed_str)s)'
             else:
-                msg_template = '%(_percent_str)s at %(_speed_str)s ETA %(_eta_str)s'
-        if s.get('fragment_index') and s.get('fragment_count'):
-            msg_template += ' (frag %(fragment_index)s/%(fragment_count)s)'
-        elif s.get('fragment_index'):
-            msg_template += ' (frag %(fragment_index)s)'
+                msg_template = '%(_downloaded_bytes_str)s at %(_speed_str)s'
+        else:
+            msg_template = '%(_percent_str)s at %(_speed_str)s ETA %(_eta_str)s'
+        if s.get('fragment_index'):
+            if s.get('fragment_count'):
+                msg_template += ' (frag %(fragment_index)s/%(fragment_count)s)'
+            else:
+                msg_template += ' (frag %(fragment_index)s)'
         self._report_progress_status(s, msg_template)
 
     def report_resuming_byte(self, resume_len):

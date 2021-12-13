@@ -132,18 +132,17 @@ class MediasiteIE(InfoExtractor):
 
         fragments = []
         for i, slide in enumerate(Stream['Slides']):
-            if i == 0:
-                if slide['Time'] > 0:
-                    default_slide = images.get('DefaultSlide')
-                    if default_slide is None:
-                        default_slide = images.get('DefaultStreamImage')
-                    if default_slide is not None:
-                        default_slide = default_slide['ImageFilename']
-                    if default_slide is not None:
-                        fragments.append({
-                            'path': default_slide,
-                            'duration': slide['Time'] / 1000,
-                        })
+            if i == 0 and slide['Time'] > 0:
+                default_slide = images.get('DefaultSlide')
+                if default_slide is None:
+                    default_slide = images.get('DefaultStreamImage')
+                if default_slide is not None:
+                    default_slide = default_slide['ImageFilename']
+                if default_slide is not None:
+                    fragments.append({
+                        'path': default_slide,
+                        'duration': slide['Time'] / 1000,
+                    })
 
             next_time = try_get(None, [
                 lambda _: Stream['Slides'][i + 1]['Time'],

@@ -335,9 +335,8 @@ class MailRuMusicSearchIE(MailRuMusicSearchBaseIE):
             total = try_get(
                 search, lambda x: x['Results']['music']['Total'], int)
 
-            if total is not None:
-                if offset > total:
-                    break
+            if total is not None and offset > total:
+                break
 
             offset += LIMIT
 

@@ -325,30 +325,29 @@ class LivestreamOriginalIE(InfoExtractor):
         content_id = mobj.group('id')
         if url_type == 'folder':
             return self._extract_folder(url, content_id)
+        # this url is used on mobile devices
+        stream_url = 'http://x%sx.api.channel.livestream.com/3.0/getstream.json' % user
+        info = {}
+        if content_id:
+            stream_url += '?id=%s' % content_id
+            info = self._extract_video_info(user, content_id)
         else:
-            # this url is used on mobile devices
-            stream_url = 'http://x%sx.api.channel.livestream.com/3.0/getstream.json' % user
-            info = {}
-            if content_id:
-                stream_url += '?id=%s' % content_id
-                info = self._extract_video_info(user, content_id)
-            else:
-                content_id = user
-                webpage = self._download_webpage(url, content_id)
-                info = {
-                    'title': self._og_search_title(webpage),
-                    'description': self._og_search_description(webpage),
-                    'thumbnail': self._search_regex(r'channelLogo\.src\s*=\s*"([^"]+)"', webpage, 'thumbnail', None),
-                }
-            video_data = self._download_json(stream_url, content_id)
-            is_live = video_data.get('isLive')
-            info.update({
-                'id': content_id,
-                'title': self._live_title(info['title']) if is_live else info['title'],
-                'formats': self._extract_video_formats(video_data, content_id),
-                'is_live': is_live,
-            })
-            return info
+            content_id = user
+            webpage = self._download_webpage(url, content_id)
+            info = {
+                'title': self._og_search_title(webpage),
+                'description': self._og_search_description(webpage),
+                'thumbnail': self._search_regex(r'channelLogo\.src\s*=\s*"([^"]+)"', webpage, 'thumbnail', None),
+            }
+        video_data = self._download_json(stream_url, content_id)
+        is_live = video_data.get('isLive')
+        info.update({
+            'id': content_id,
+            'title': self._live_title(info['title']) if is_live else info['title'],
+            'formats': self._extract_video_formats(video_data, content_id),
+            'is_live': is_live,
+        })
+        return info
 
 
 # The server doesn't support HEAD request, the generic extractor can't detect

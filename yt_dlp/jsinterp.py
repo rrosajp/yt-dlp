@@ -401,9 +401,7 @@ class JSInterpreter(object):
                     if index < 0:
                         index += len(obj)
                     add_items = argvals[2:]
-                    res = []
-                    for i in range(index, min(index + howMany, len(obj))):
-                        res.append(obj.pop(index))
+                    res = [obj.pop(index) for _ in range(index, min(index + howMany, len(obj)))]
                     for i, item in enumerate(add_items):
                         obj.insert(index + i, item)
                     return res

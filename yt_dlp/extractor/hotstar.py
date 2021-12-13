@@ -214,10 +214,7 @@ class HotStarIE(HotStarBaseIE):
                 elif 'package:dash' in tags or ext == 'mpd':
                     current_formats, current_subs = self._extract_mpd_formats_and_subtitles(
                         format_url, video_id, mpd_id=f'{dr}-dash', headers=headers)
-                elif ext == 'f4m':
-                    # produce broken files
-                    pass
-                else:
+                elif ext != 'f4m':
                     current_formats = [{
                         'url': format_url,
                         'width': int_or_none(playback_set.get('width')),

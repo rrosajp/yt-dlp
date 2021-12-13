@@ -68,7 +68,7 @@ class MildomBaseIE(InfoExtractor):
     @staticmethod
     def iso_timestamp():
         'new Date().toISOString()'
-        return datetime.utcnow().isoformat()[0:-3] + 'Z'
+        return datetime.utcnow().isoformat()[:-3] + 'Z'
 
     def guest_id(self):
         'getGuestId'

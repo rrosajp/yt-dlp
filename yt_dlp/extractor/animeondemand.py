@@ -199,8 +199,6 @@ class AnimeOnDemandIE(InfoExtractor):
                                 entry_protocol='m3u8_native', m3u8_id=format_id, fatal=False)
                         elif source.get('type') == 'video/dash' or ext == 'mpd':
                             continue
-                            file_formats = self._extract_mpd_formats(
-                                file_, video_id, mpd_id=format_id, fatal=False)
                         else:
                             continue
                         for f in file_formats:
@@ -265,8 +263,7 @@ class AnimeOnDemandIE(InfoExtractor):
                     'episode_number': episode_number,
                 }
 
-                for e in extract_entries(episode_html, video_id, common_info):
-                    yield e
+                yield from extract_entries(episode_html, video_id, common_info)
 
         def extract_film(html, video_id):
             common_info = {
@@ -274,8 +271,7 @@ class AnimeOnDemandIE(InfoExtractor):
                 'title': anime_title,
                 'description': anime_description,
             }
-            for e in extract_entries(html, video_id, common_info):
-                yield e
+            yield from extract_entries(html, video_id, common_info)
 
         def entries():
             has_episodes = False
@@ -284,8 +280,7 @@ class AnimeOnDemandIE(InfoExtractor):
                 yield e
 
             if not has_episodes:
-                for e in extract_film(webpage, anime_id):
-                    yield e
+                yield from extract_film(webpage, anime_id)
 
         return self.playlist_result(
             entries(), anime_id, anime_title, anime_description)

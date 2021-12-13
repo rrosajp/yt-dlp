@@ -43,9 +43,10 @@ class METAIE(InfoExtractor):
 
         if st_html5:
             # uppod st decryption algorithm is reverse engineered from function un(s) at uppod.js
-            json_str = ''
-            for i in range(0, len(st_html5), 3):
-                json_str += '&#x0%s;' % st_html5[i:i + 3]
+            json_str = ''.join(
+                '&#x0%s;' % st_html5[i : i + 3] for i in range(0, len(st_html5), 3)
+            )
+
             uppod_data = self._parse_json(unescapeHTML(json_str), video_id)
             error = uppod_data.get('customnotfound')
             if error:

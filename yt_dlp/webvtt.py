@@ -189,11 +189,10 @@ class Magic(HeaderBlock):
                     raise ParseError(parser)
             else:
                 m = parser.consume(cls._REGEX_TSMAP_MPEGTS)
-                if m:
-                    mpegts = int_or_none(m.group(1))
-                    if mpegts is None:
-                        raise ParseError(parser)
-                else:
+                if not m:
+                    raise ParseError(parser)
+                mpegts = int_or_none(m.group(1))
+                if mpegts is None:
                     raise ParseError(parser)
             if parser.consume(cls._REGEX_TSMAP_SEP):
                 continue
@@ -273,11 +272,8 @@ class CueBlock(Block):
     def parse(cls, parser):
         parser = parser.child()
 
-        id = None
         m = parser.consume(cls._REGEX_ID)
-        if m:
-            id = m.group(1)
-
+        id = m.group(1) if m else None
         m0 = parser.consume(_REGEX_TS)
         if not m0:
             return None

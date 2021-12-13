@@ -12,9 +12,7 @@ if OS_NAME == 'Windows':
         VarStruct, VarFileInfo, StringStruct, StringTable,
         StringFileInfo, FixedFileInfo, VSVersionInfo, SetVersion,
     )
-elif OS_NAME == 'Darwin':
-    pass
-else:
+elif OS_NAME != 'Darwin':
     raise Exception('{OS_NAME} is not supported')
 
 ARCH = platform.architecture()[0][:2]
@@ -56,7 +54,7 @@ def main():
 def parse_options():
     # Compatability with older arguments
     opts = sys.argv[1:]
-    if opts[0:1] in (['32'], ['64']):
+    if opts[:1] in (['32'], ['64']):
         if ARCH != opts[0]:
             raise Exception(f'{opts[0]}bit executable cannot be built on a {ARCH}bit system')
         opts = opts[1:]

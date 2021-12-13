@@ -128,20 +128,21 @@ class HttpFD(FileDownloader):
                     if content_range:
                         content_range_m = re.search(r'bytes (\d+)-(\d+)?(?:/(\d+))?', content_range)
                         # Content-Range is present and matches requested Range, resume is possible
-                        if content_range_m:
-                            if range_start == int(content_range_m.group(1)):
-                                content_range_end = int_or_none(content_range_m.group(2))
-                                content_len = int_or_none(content_range_m.group(3))
-                                accept_content_len = (
-                                    # Non-chunked download
-                                    not ctx.chunk_size
-                                    # Chunked download and requested piece or
-                                    # its part is promised to be served
-                                    or content_range_end == range_end
-                                    or content_len < range_end)
-                                if accept_content_len:
-                                    ctx.data_len = content_len
-                                    return
+                        if content_range_m and range_start == int(
+                            content_range_m.group(1)
+                        ):
+                            content_range_end = int_or_none(content_range_m.group(2))
+                            content_len = int_or_none(content_range_m.group(3))
+                            accept_content_len = (
+                                # Non-chunked download
+                                not ctx.chunk_size
+                                # Chunked download and requested piece or
+                                # its part is promised to be served
+                                or content_range_end == range_end
+                                or content_len < range_end)
+                            if accept_content_len:
+                                ctx.data_len = content_len
+                                return
                     # Content-Range is either not present or invalid. Assuming remote webserver is
                     # trying to send the whole file, resume is not possible, so wiping the local file
                     # and performing entire redownload

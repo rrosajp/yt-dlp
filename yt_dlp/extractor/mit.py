@@ -109,17 +109,14 @@ class OCWMITIE(InfoExtractor):
         embed_chapter_media = re.search(r'ocw_embed_chapter_media\((.+?)\)', webpage)
         if embed_chapter_media:
             metadata = re.sub(r'[\'"]', '', embed_chapter_media.group(1))
-            metadata = re.split(r', ?', metadata)
-            yt = metadata[1]
         else:
             # search for call to ocw_embed_chapter_media(container_id, media_url, provider, page_url, image_url, captions_file)
             embed_media = re.search(r'ocw_embed_media\((.+?)\)', webpage)
-            if embed_media:
-                metadata = re.sub(r'[\'"]', '', embed_media.group(1))
-                metadata = re.split(r', ?', metadata)
-                yt = metadata[1]
-            else:
+            if not embed_media:
                 raise ExtractorError('Unable to find embedded YouTube video.')
+            metadata = re.sub(r'[\'"]', '', embed_media.group(1))
+        metadata = re.split(r', ?', metadata)
+        yt = metadata[1]
         video_id = YoutubeIE.extract_id(yt)
 
         return {

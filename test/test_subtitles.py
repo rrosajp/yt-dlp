@@ -42,8 +42,7 @@ class BaseTestSubtitles(unittest.TestCase):
         self.DL.add_info_extractor(self.ie)
 
     def getInfoDict(self):
-        info_dict = self.DL.extract_info(self.url, download=False)
-        return info_dict
+        return self.DL.extract_info(self.url, download=False)
 
     def getSubtitles(self):
         info_dict = self.getInfoDict()
@@ -54,7 +53,7 @@ class BaseTestSubtitles(unittest.TestCase):
             if sub_info.get('data') is None:
                 uf = self.DL.urlopen(sub_info['url'])
                 sub_info['data'] = uf.read().decode('utf-8')
-        return dict((l, sub_info['data']) for l, sub_info in subtitles.items())
+        return {l: sub_info['data'] for l, sub_info in subtitles.items()}
 
 
 @is_download_test
@@ -345,11 +344,6 @@ class TestRtveSubtitles(BaseTestSubtitles):
     def test_allsubtitles(self):
         print('Skipping, only available from Spain')
         return
-        self.DL.params['writesubtitles'] = True
-        self.DL.params['allsubtitles'] = True
-        subtitles = self.getSubtitles()
-        self.assertEqual(set(subtitles.keys()), set(['es']))
-        self.assertEqual(md5(subtitles['es']), '69e70cae2d40574fb7316f31d6eb7fca')
 
 
 @is_download_test

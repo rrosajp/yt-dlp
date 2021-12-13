@@ -653,8 +653,7 @@ class TestUtil(unittest.TestCase):
             def get_page(pagenum):
                 firstid = pagenum * pagesize
                 upto = min(size, pagenum * pagesize + pagesize)
-                for i in range(firstid, upto):
-                    yield i
+                yield from range(firstid, upto)
 
             pl = OnDemandPagedList(get_page, pagesize)
             got = pl.getslice(*sliceargs)

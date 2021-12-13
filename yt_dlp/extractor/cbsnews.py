@@ -94,9 +94,14 @@ class CBSNewsIE(CBSIE):
 
         webpage = self._download_webpage(url, display_id)
 
-        entries = []
-        for embed_url in re.findall(r'<iframe[^>]+data-src="(https?://(?:www\.)?cbsnews\.com/embed/video/[^#]*#[^"]+)"', webpage):
-            entries.append(self.url_result(embed_url, CBSNewsEmbedIE.ie_key()))
+        entries = [
+            self.url_result(embed_url, CBSNewsEmbedIE.ie_key())
+            for embed_url in re.findall(
+                r'<iframe[^>]+data-src="(https?://(?:www\.)?cbsnews\.com/embed/video/[^#]*#[^"]+)"',
+                webpage,
+            )
+        ]
+
         if entries:
             return self.playlist_result(
                 entries, playlist_title=self._html_search_meta(['og:title', 'twitter:title'], webpage),

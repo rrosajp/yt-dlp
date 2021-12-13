@@ -466,7 +466,7 @@ class YoutubeWebArchiveIE(InfoExtractor):
         res = self._download_json('https://web.archive.org/cdx/search/cdx', item_id, note, query=query)
         if isinstance(res, list) and len(res) >= 2:
             # format response to make it easier to use
-            return list(dict(zip(res[0], v)) for v in res[1:])
+            return [dict(zip(res[0], v)) for v in res[1:]]
         elif not isinstance(res, list) or len(res) != 0:
             self.report_warning('Error while parsing CDX API response' + bug_reports_message())
 
@@ -655,13 +655,13 @@ class YoutubeWebArchiveIE(InfoExtractor):
             itag = try_get(video_file_url_qs, lambda x: x['itag'][0])
             if itag and itag in YoutubeIE._formats:
                 format.update(YoutubeIE._formats[itag])
-                format.update({'format_id': itag})
+                format['format_id'] = itag
             else:
                 mime = try_get(video_file_url_qs, lambda x: x['mime'][0])
                 ext = (mimetype2ext(mime)
                        or urlhandle_detect_ext(urlh)
                        or mimetype2ext(urlh.headers.get('x-archive-guessed-content-type')))
-                format.update({'ext': ext})
+                format['ext'] = ext
             info['formats'] = [format]
             if not info.get('duration'):
                 info['duration'] = str_to_int(try_get(video_file_url_qs, lambda x: x['dur'][0]))

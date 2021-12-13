@@ -181,37 +181,40 @@ class GoIE(AdobePassIE):
                     layout,
                     (lambda x: x['videoid'], lambda x: x['video']['id']),
                     compat_str)
-            if not video_id:
-                video_id = self._search_regex(
-                    (
-                        # There may be inner quotes, e.g. data-video-id="'VDKA3609139'"
-                        # from http://freeform.go.com/shows/shadowhunters/episodes/season-2/1-this-guilty-blood
-                        r'data-video-id=["\']*(VDKA\w+)',
-                        # page.analytics.videoIdCode
-                        r'\bvideoIdCode["\']\s*:\s*["\']((?:vdka|VDKA)\w+)',
-                        # https://abc.com/shows/the-rookie/episode-guide/season-02/03-the-bet
-                        r'\b(?:video)?id["\']\s*:\s*["\'](VDKA\w+)'
-                    ), webpage, 'video id', default=video_id)
-            if not site_info:
-                brand = self._search_regex(
-                    (r'data-brand=\s*["\']\s*(\d+)',
-                     r'data-page-brand=\s*["\']\s*(\d+)'), webpage, 'brand',
-                    default='004')
-                site_info = next(
-                    si for _, si in self._SITE_INFO.items()
-                    if si.get('brand') == brand)
-            if not video_id:
-                # show extraction works for Disney, DisneyJunior and DisneyXD
-                # ABC and Freeform has different layout
-                show_id = self._search_regex(r'data-show-id=["\']*(SH\d+)', webpage, 'show id')
-                videos = self._extract_videos(brand, show_id=show_id)
-                show_title = self._search_regex(r'data-show-title="([^"]+)"', webpage, 'show title', fatal=False)
-                entries = []
-                for video in videos:
-                    entries.append(self.url_result(
-                        video['url'], 'Go', video.get('id'), video.get('title')))
-                entries.reverse()
-                return self.playlist_result(entries, show_id, show_title)
+        if not video_id:
+            video_id = self._search_regex(
+                (
+                    # There may be inner quotes, e.g. data-video-id="'VDKA3609139'"
+                    # from http://freeform.go.com/shows/shadowhunters/episodes/season-2/1-this-guilty-blood
+                    r'data-video-id=["\']*(VDKA\w+)',
+                    # page.analytics.videoIdCode
+                    r'\bvideoIdCode["\']\s*:\s*["\']((?:vdka|VDKA)\w+)',
+                    # https://abc.com/shows/the-rookie/episode-guide/season-02/03-the-bet
+                    r'\b(?:video)?id["\']\s*:\s*["\'](VDKA\w+)'
+                ), webpage, 'video id', default=video_id)
+        if not site_info:
+            brand = self._search_regex(
+                (r'data-brand=\s*["\']\s*(\d+)',
+                 r'data-page-brand=\s*["\']\s*(\d+)'), webpage, 'brand',
+                default='004')
+            site_info = next(
+                si for _, si in self._SITE_INFO.items()
+                if si.get('brand') == brand)
+        if not video_id:
+            # show extraction works for Disney, DisneyJunior and DisneyXD
+            # ABC and Freeform has different layout
+            show_id = self._search_regex(r'data-show-id=["\']*(SH\d+)', webpage, 'show id')
+            videos = self._extract_videos(brand, show_id=show_id)
+            show_title = self._search_regex(r'data-show-title="([^"]+)"', webpage, 'show title', fatal=False)
+            entries = [
+                self.url_result(
+                    video['url'], 'Go', video.get('id'), video.get('title')
+                )
+                for video in videos
+            ]
+
+            entries.reverse()
+            return self.playlist_result(entries, show_id, show_title)
         video_data = self._extract_videos(brand, video_id)[0]
         video_id = video_data['id']
         title = video_data['title']

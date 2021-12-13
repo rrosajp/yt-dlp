@@ -163,14 +163,13 @@ class FranceTVIE(InfoExtractor):
                     'format_id': 'rtmp-%s' % format_id,
                     'ext': 'flv',
                 })
-            else:
-                if self._is_valid_url(video_url, video_id, format_id):
-                    formats.append({
-                        'url': video_url,
-                        'format_id': format_id,
-                    })
+            elif self._is_valid_url(video_url, video_id, format_id):
+                formats.append({
+                    'url': video_url,
+                    'format_id': format_id,
+                })
 
-            # XXX: what is video['captions']?
+                # XXX: what is video['captions']?
 
         for f in formats:
             if f.get('acodec') != 'none' and f.get('language') in ('qtz', 'qad'):
@@ -221,8 +220,8 @@ class FranceTVIE(InfoExtractor):
             qs = parse_qs(url)
             video_id = qs.get('idDiffusion', [None])[0]
             catalog = qs.get('catalogue', [None])[0]
-            if not video_id:
-                raise ExtractorError('Invalid URL', expected=True)
+        if not video_id:
+            raise ExtractorError('Invalid URL', expected=True)
 
         return self._extract_video(video_id, catalog)
 

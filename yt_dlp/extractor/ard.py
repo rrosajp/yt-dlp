@@ -369,9 +369,9 @@ class ARDIE(InfoExtractor):
                     'url': server_prefix,
                     'playpath': file_name,
                 })
+            elif not format_url:
+                continue
             else:
-                if not format_url:
-                    continue
                 f['url'] = format_url
             formats.append(f)
         self._sort_formats(formats)
@@ -544,7 +544,7 @@ class ARDBetaMediathekIE(ARDMediathekBaseIE):
                >= show_page['pagination']['totalElements']):
                 # we've processed enough pages to get all playlist entries
                 break
-            pageNumber = pageNumber + 1
+            pageNumber += 1
 
         return self.playlist_result(entries, playlist_title=display_id)
 

@@ -101,13 +101,11 @@ class KakaoIE(InfoExtractor):
             })
         self._sort_formats(formats)
 
-        thumbs = []
-        for thumb in clip.get('clipChapterThumbnailList') or []:
-            thumbs.append({
+        thumbs = [{
                 'url': thumb.get('thumbnailUrl'),
                 'id': compat_str(thumb.get('timeInSec')),
                 'preference': -1 if thumb.get('isDefault') else 0
-            })
+            } for thumb in clip.get('clipChapterThumbnailList') or []]
         top_thumbnail = clip.get('thumbnailUrl')
         if top_thumbnail:
             thumbs.append({

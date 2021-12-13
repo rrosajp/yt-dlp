@@ -155,7 +155,7 @@ class DouyuShowIE(InfoExtractor):
 
         video_info = None
 
-        for trial in range(5):
+        for _ in range(5):
             # Sometimes Douyu rejects our request. Let's try it more times
             try:
                 video_info = self._download_json(

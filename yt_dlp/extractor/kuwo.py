@@ -326,12 +326,11 @@ class KuwoMvIE(KuwoBaseIE):
         mobj = re.search(
             r'<h1[^>]+title="(?P<song>[^"]+)">[^<]+<span[^>]+title="(?P<singer>[^"]+)"',
             webpage)
-        if mobj:
-            song_name = mobj.group('song')
-            singer_name = mobj.group('singer')
-        else:
+        if not mobj:
             raise ExtractorError('Unable to find song or singer names')
 
+        song_name = mobj.group('song')
+        singer_name = mobj.group('singer')
         formats = self._get_formats(song_id, tolerate_ip_deny=True)
 
         mv_url = self._download_webpage(

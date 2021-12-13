@@ -26,9 +26,7 @@ class CartoonNetworkIE(TurnerBaseIE):
         webpage = self._download_webpage(url, display_id)
 
         def find_field(global_re, name, content_re=None, value_re='[^"]+', fatal=False):
-            metadata_re = ''
-            if content_re:
-                metadata_re = r'|video_metadata\.content_' + content_re
+            metadata_re = r'|video_metadata\.content_' + content_re if content_re else ''
             return self._search_regex(
                 r'(?:_cnglobal\.currentVideo\.%s%s)\s*=\s*"(%s)";' % (global_re, metadata_re, value_re),
                 webpage, name, fatal=fatal)

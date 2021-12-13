@@ -33,8 +33,8 @@ def rsa_verify(message, signature, key):
 
 def detect_variant():
     if hasattr(sys, 'frozen'):
-        prefix = 'mac' if sys.platform == 'darwin' else 'win'
         if getattr(sys, '_MEIPASS', None):
+            prefix = 'mac' if sys.platform == 'darwin' else 'win'
             if sys._MEIPASS == os.path.dirname(sys.executable):
                 return f'{prefix}_dir'
             return f'{prefix}_exe'

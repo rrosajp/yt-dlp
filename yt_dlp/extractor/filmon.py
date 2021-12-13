@@ -158,14 +158,16 @@ class FilmOnChannelIE(InfoExtractor):
             })
         self._sort_formats(formats)
 
-        thumbnails = []
-        for name, width, height in self._THUMBNAIL_RES:
-            thumbnails.append({
+        thumbnails = [
+            {
                 'id': name,
-                'url': 'http://static.filmon.com/assets/channels/%s/%s.png' % (channel_id, name),
+                'url': 'http://static.filmon.com/assets/channels/%s/%s.png'
+                % (channel_id, name),
                 'width': width,
                 'height': height,
-            })
+            }
+            for name, width, height in self._THUMBNAIL_RES
+        ]
 
         return {
             'id': channel_id,
