@@ -481,6 +481,7 @@ class YoutubeDL(object):
     extractor_args:    A dictionary of arguments to be passed to the extractors.
                        See "EXTRACTOR ARGUMENTS" for details.
                        Eg: {'youtube': {'skip': ['dash', 'hls']}}
+    mark_watched:      Mark videos watched (even with --simulate). Only for YouTube
     youtube_include_dash_manifest: Deprecated - Use extractor_args instead.
                        If True (default), DASH manifests and related
                        data will be downloaded and processed by extractor.

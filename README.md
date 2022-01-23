@@ -1043,7 +1043,7 @@ You can configure yt-dlp by placing any supported command line option to a confi
 
 1. **Main Configuration**: The file given by `--config-location`
 1. **Portable Configuration**: `yt-dlp.conf` in the same directory as the bundled binary. If you are running from source-code (`<root dir>/yt_dlp/__main__.py`), the root directory is used instead.
-1. **Home Configuration**: `yt-dlp.conf` in the home path given by `-P "home:<path>"`, or in the current directory if no such path is given
+1. **Home Configuration**: `yt-dlp.conf` in the home path given by `-P`, or in the current directory if no such path is given
 1. **User Configuration**:
     * `%XDG_CONFIG_HOME%/yt-dlp/config` (recommended on Linux/macOS)
     * `%XDG_CONFIG_HOME%/yt-dlp.conf`
